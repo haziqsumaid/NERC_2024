@@ -756,6 +756,37 @@ void grid2Blue(){
   lineFollowEncoderFront(300);
 }
 
+void grid3blue()
+{
+  //#################################################
+  // blue
+  // 1,1,1
+  // 0,0,0
+  // 0,0,0
+
+  // Step 1: Move to first intersection (4 intersections forward)
+  lineFollowUntil(4, true, false);
+  checkPoint();
+  // Step 2: Turn left
+  leftEncoder(210);
+  halt();
+  delay(500);
+  // Step 3: Move forward
+  lineFollowUntil(4, true, false);
+  checkPoint();
+  // Step 4: Turn left
+  leftEncoder(210);
+  halt();
+  delay(500);
+  // Step 5: Forward 1 step
+  lineFollowUntil(1, true, false);
+  checkPoint();
+  // Step 6: Turn right
+  rightEncoder(210);
+  halt();
+  delay(500);
+}
+
 void grid9Blue(){
   // blue
   // 0,1,0
