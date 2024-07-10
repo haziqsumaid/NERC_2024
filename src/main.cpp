@@ -731,7 +731,7 @@ void grid2Blue(){
   delay(500);
   centered();
   delay(500);
-  leftEncoder(490,70);
+  leftEncoder(470);
   delay(500);
   lineFollowUntil(1,false,true);
   centered();
@@ -749,9 +749,9 @@ void grid2Blue(){
   delay(500);
   leftEncoder(210);
   delay(500);
-  lineFollowUntil(4,true,false);
-  checkPoint();
-  lineFollowEncoderFront(300);
+  lineFollowUntil(5,true,false,60,65);
+  // checkPoint();
+  // lineFollowEncoderFront(300);
 }
 
 void grid9Blue(){
@@ -894,11 +894,11 @@ void grid9Blue(){
   
   lineFollowUntil(2,false,true);
   centered();
-  myservo.write(50);
-  delay(200);
+  // myservo.write(50);
+  // delay(200);
   rightEncoder(235);
   delay(500);
-  treePicInit();
+  // treePicInit();
   delay(500);
   centered();
   lineFollowEncoderFront(140);
@@ -1010,11 +1010,11 @@ void setup() {
   // halt();
 
 
-  grid2Blue();
+  // grid2Blue();
   // delay(1000);
   // leftEncoder(490,70);
   // myservo.write(12);
-  // grid9Blue();
+  grid9Blue();
 
 
 }
