@@ -260,9 +260,9 @@ void justLineFollowFront()
   }
 }
 
+// simple back line follow
 void justLineFollowBack()
 {
-
   int  leftmost = analogRead(array_BML);
   int  left = analogRead(array_BL);
   int  middle = analogRead(array_BC);
@@ -346,6 +346,7 @@ void forwardEncoder(int value)
     halt();
 }
 
+// function to linefollow based on encoder value
 void lineFollowEncoderFront(int value)
 {
     leftEncoderTicks = 0;
@@ -386,6 +387,7 @@ void backEncoder(int value)
 
 }
 
+//  front lineFollow based on currentCounter  - currentCounter means to count black intersections
 void lineFollowFront(int &currentCounter, int targetCounter,int leftmost, int left,int  middle,int right,int rightmost,int lspeed,int rspeed)
 {
   if(left >= threshold && middle <= threshold && right >=threshold)
@@ -422,6 +424,7 @@ void lineFollowFront(int &currentCounter, int targetCounter,int leftmost, int le
   }
 }
 
+//  back lineFollow based on currentCounter  - currentCounter means to count black intersections
 void lineFollowBack(int &currentCounter, int targetCounter, int leftmost, int left, int middle, int right, int rightmost)
 {
   if(left >= threshold && middle <= threshold && right >=threshold)
@@ -501,6 +504,8 @@ void lineFollowUntil(int untilCount,bool frontArray=false,bool backArray=false,i
   }
 }
 
+// when the front linefollow IR array reaches the line (intersection), 
+// then we will call this function to move the robot until the middle sensors on both right and left side reaches the line.
 void checkPoint(){
   while (true){
     int right_ir = digitalRead(rightIR);
@@ -518,6 +523,8 @@ void checkPoint(){
   }
 }
 
+// when the back linefollow IR array reaches the target line (intersection), 
+// then we will call this function to move the robot until the middle sensors on both right and left side reaches the line.
 void centered(){
   while (true){
     int right_ir = digitalRead(rightIR);
@@ -534,6 +541,7 @@ void centered(){
   }
 }
 
+// rotate servo arm down, ready to pick tree
 void treePicInit(){
 
     for (pos = 80; pos >= 12; pos -= 1) {
@@ -542,6 +550,7 @@ void treePicInit(){
   }
 }
 
+// rotate servo arm up, ready to pick tree up
 void treePic(){
     for (pos = 12; pos <= 50; pos += 1) {
       myservo.write(pos);          
@@ -550,6 +559,7 @@ void treePic(){
   
 }
 
+// drop thee tree
 void treeDrop(){
 
     for (pos = 50; pos >= 12; pos -= 1) {
