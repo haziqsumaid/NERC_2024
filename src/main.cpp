@@ -198,13 +198,13 @@ void rightTurnBack()
   analogWrite(moter_R_RPWM, 50);
 }
 
-void sharpRightTurn()
+void sharpRightTurn(int speed=150)
 {
-  analogWrite(moter_L_LPWM, 150);
+  analogWrite(moter_L_LPWM, speed);
   analogWrite(moter_L_RPWM, 0);
 
   analogWrite(moter_R_LPWM, 0);
-  analogWrite(moter_R_RPWM, 150);
+  analogWrite(moter_R_RPWM, speed);
 }
 
 void leftTurn()
@@ -223,12 +223,12 @@ void leftTurnBack()
   analogWrite(moter_R_RPWM, 0);
 }
 
-void sharpLeftTurn()
+void sharpLeftTurn(int speed=150)
 {
   analogWrite(moter_L_LPWM, 0);
-  analogWrite(moter_L_RPWM, 150);
+  analogWrite(moter_L_RPWM, speed);
 
-  analogWrite(moter_R_LPWM, 150);
+  analogWrite(moter_R_LPWM, speed);
   analogWrite(moter_R_RPWM, 0);
 }
 
@@ -242,7 +242,7 @@ void justLineFollowFront()
 
   if(left >= threshold && middle <= threshold && right >=threshold)
   {
-    bothForward(lspeed,rspeed);
+    bothForward(lspeed-20+5,rspeed-20);
   }
   else if(left <= threshold  && right >=threshold)
   {
@@ -261,7 +261,7 @@ void justLineFollowFront()
     rightTurn();
   }
   else{
-    bothForward(lspeed,rspeed);
+    bothForward(lspeed-15,rspeed);
   }
 }
 
@@ -311,7 +311,7 @@ void RencodeFunc()
     rightEncoderTicks++;
 }
 
-void rightEncoder(int value)
+void rightEncoder(int value,int speed=150)
 {
     leftEncoderTicks = 0;
     rightEncoderTicks = 0;
@@ -319,12 +319,12 @@ void rightEncoder(int value)
     {
         Serial.print(leftEncoderTicks);
         Serial.print(" ");
-        sharpRightTurn();
+        sharpRightTurn(speed);
     }
     halt();
 }
 
-void leftEncoder(int value)
+void leftEncoder(int value, int speed=150)
 {
     leftEncoderTicks = 0;
     rightEncoderTicks = 0;
@@ -332,7 +332,7 @@ void leftEncoder(int value)
     {
         Serial.print(leftEncoderTicks);
         Serial.print(" ");
-        sharpLeftTurn();
+        sharpLeftTurn(speed);
  
     }
     halt();
@@ -731,9 +731,12 @@ void grid2Blue(){
   delay(500);
   centered();
   delay(500);
-  leftEncoder(470);
+  leftEncoder(490,70);
   delay(500);
-  lineFollowEncoderBack(100);
+  lineFollowUntil(1,false,true);
+  centered();
+  lineFollowUntil(1,true,false);
+  // lineFollowEncoderBack(100);
   delay(500);
   checkPoint();
   delay(500);
@@ -992,7 +995,7 @@ void setup() {
   myservo.attach(servo_pin);
   myservo.write(90);
 
-
+ 
 
 // ###############################################
 // map reading
@@ -1007,9 +1010,12 @@ void setup() {
   // halt();
 
 
-  // grid2();
-  myservo.write(12);
-  grid9Blue();
+  grid2Blue();
+  // delay(1000);
+  // leftEncoder(490,70);
+  // myservo.write(12);
+  // grid9Blue();
+
 
 }
 
