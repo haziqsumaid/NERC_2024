@@ -1407,9 +1407,6 @@ void setup() {
   // delay(1000);
   // leftEncoder(490,70);
   // myservo.write(12);
-  grid1Blue();
-  // grid9Blue();
-  // grid3blue();
 
 
 }
