@@ -1147,7 +1147,7 @@ void grid9Blue(){
 }
 
 
-void grid5Blue(){
+void grid8Blue(){
   // blue
   // 1,0,1
   // 0,0,0
@@ -1612,7 +1612,7 @@ void setup() {
   // halt();
 
 
-  grid5Blue();
+  grid8Blue();
   // delay(1000);
   // leftEncoder(490,70);
   // myservo.write(12);
