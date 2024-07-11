@@ -1251,7 +1251,7 @@ void grid4Blue(){
   lineFollowUntil(1,true,false);
   checkPoint();
   delay(500);
-  rightEncoder(230);
+  rightEncoder(235);
   delay(500);
   lineFollowUntil(1,true,false);
   checkPoint();
@@ -1332,7 +1332,7 @@ void grid4Blue(){
   delay(500);
   treeDrop();
   delay(500);
-  lineFollowUntil(2,true,false);
+  lineFollowUntil(2,false,true);
   centered();
   myservo.write(80);
   delay(500);
