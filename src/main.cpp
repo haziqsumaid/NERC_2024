@@ -1,33 +1,46 @@
 #include <Arduino.h>
-#include <Servo.h>
+#include "MotorControl.h"
+#include "EncoderControl.h"
+#include "LineFollow.h"
+#include "ServoControl.h"
+
+// Blue Grid Includes
+#include "Blue/BlueGrid1.h"
+#include "Blue/BlueGrid2.h"
+#include "Blue/BlueGrid3.h"
+#include "Blue/BlueGrid4.h"
+#include "Blue/BlueGrid5.h"
+#include "Blue/BlueGrid6.h"
+#include "Blue/BlueGrid7.h"
+#include "Blue/BlueGrid8.h"
+#include "Blue/BlueGrid9.h"
+#include "Blue/BlueGrid10.h"
+
+
+
+// Red Grid Includes
+#include "Red/RedGrid1.h"
+#include "Red/RedGrid2.h"
+#include "Red/RedGrid3.h"
+#include "Red/RedGrid4.h"
+#include "Red/RedGrid5.h"
+#include "Red/RedGrid6.h"
+#include "Red/RedGrid7.h"
+#include "Red/RedGrid8.h"
+#include "Red/RedGrid9.h"
+#include "Red/RedGrid10.h"
+
 
 // encoders
 int EncoderRight = 3;
 int EncoderLeft = 2;
 
-int leftEncoderTicks = 0;
-int rightEncoderTicks = 0;
-int pos = 0;
-
-Servo myservo;
 unsigned long startTime = millis();
 
-// threshold values for line detection
-const int threshold = 800;
+Servo myservo;
 
-//front array
-int array_FML = A0;
-int array_FL = A15;
-int array_FC = A14;
-int array_FR = A13;
-int array_FMR = A12;
-
-//back array
-int array_BML = A8;
-int array_BL = A9;
-int array_BC = A10;
-int array_BR = A11;
-int array_BMR = A2;
+// servo sensor
+int servo_pin = 15;
 
 // map reader
 // (1,1) A4
@@ -40,30 +53,23 @@ int map_reader_1_2 = A5;
 int map_reader_2_2 = A6;
 int map_reader_3_1 = A7;
 
-
-
-// moters 8,9,10,11
-int moter_L_LPWM = 8;
-int moter_L_RPWM = 9;
-
-int moter_R_LPWM = 10;
-int moter_R_RPWM = 11;
-
 // sonar sensor
 int trigger_pin = 44;
 int echo_pin = 45;
 
 
-// servo sensor
-int servo_pin = 15;
-
 // middle IR sensors
 int rightIR = 22;
 int leftIR = 41;
 
-// moter speeds
-int lspeed = 45;
-int rspeed = 50;
+// 34,35,36,37
+const int Button1 = 37;
+const int Button2 = 36;
+const int Button3 = 35;
+const int Button4 = 34;
+
+const int arena_selection_pin = 50; 
+
 
 // testing sensors 
 void sensorTest(int ML,int L,int C,int R,int MR)
@@ -158,1192 +164,175 @@ void arraysValues(){
   // middleIR();
 }
 
-// moter functions
-void bothForward(int lspeed,int rspeed) {
-  analogWrite(moter_L_LPWM, lspeed);
-  analogWrite(moter_L_RPWM, 0);
-  analogWrite(moter_R_LPWM, rspeed);
-  analogWrite(moter_R_RPWM, 0);
+void printPullUps(){
+  int switchValue1 = digitalRead(Button1);
+  int switchValue2 = digitalRead(Button2);
+  int switchValue3 = digitalRead(Button3);
+  int switchValue4 = digitalRead(Button4);
+
+  Serial.print("button1 = ");
+  Serial.print(switchValue1);
+  Serial.print("\t");
+  Serial.print("button2 = ");
+  Serial.print(switchValue2);
+  Serial.print("\t");
+  Serial.print("button3 = ");
+  Serial.print(switchValue3);
+  Serial.print("\t");
+  Serial.print("button4 = ");
+  Serial.print(switchValue4);
+  Serial.println();
 }
 
-void bothBackward() {
-  analogWrite(moter_L_LPWM, 0);
-  analogWrite(moter_L_RPWM, 50);
-  analogWrite(moter_R_LPWM, 0);
-  analogWrite(moter_R_RPWM, 48);
+int getSwitchValue() {
+  int switchValue1 = digitalRead(Button1);
+  int switchValue2 = digitalRead(Button2);
+  int switchValue3 = digitalRead(Button3);
+  int switchValue4 = digitalRead(Button4);
+
+  // 1 2 3 4
+  // 1 0 0 0 = 1
+  // 0 1 0 0 = 2
+  // 0 0 1 0 = 3
+  // 0 0 0 1 = 4
+
+  // 1 0 0 1 = 5
+  // 0 1 0 1 = 6
+  // 0 0 1 1 = 7
+  // 1 0 1 1 = 8
+  // 0 1 1 1 = 9
+  // 1 1 1 1 = 10
+
+  if (switchValue1 == 1 && switchValue2 == 0 && switchValue3 == 0 && switchValue4 == 0) return 1;
+  if (switchValue1 == 0 && switchValue2 == 1 && switchValue3 == 0 && switchValue4 == 0) return 2;
+  if (switchValue1 == 0 && switchValue2 == 0 && switchValue3 == 1 && switchValue4 == 0) return 3;
+  if (switchValue1 == 0 && switchValue2 == 0 && switchValue3 == 0 && switchValue4 == 1) return 4;
+  if (switchValue1 == 1 && switchValue2 == 0 && switchValue3 == 0 && switchValue4 == 1) return 5;
+  if (switchValue1 == 0 && switchValue2 == 1 && switchValue3 == 0 && switchValue4 == 1) return 6;
+  if (switchValue1 == 0 && switchValue2 == 0 && switchValue3 == 1 && switchValue4 == 1) return 7;
+  if (switchValue1 == 1 && switchValue2 == 0 && switchValue3 == 1 && switchValue4 == 1) return 8;
+  if (switchValue1 == 0 && switchValue2 == 1 && switchValue3 == 1 && switchValue4 == 1) return 9;
+  if (switchValue1 == 1 && switchValue2 == 1 && switchValue3 == 1 && switchValue4 == 1) return 10;
+  return 0;
 }
 
-void halt() {
-  analogWrite(moter_L_LPWM, 0);
-  analogWrite(moter_L_RPWM, 0);
-  analogWrite(moter_R_LPWM, 0);
-  analogWrite(moter_R_RPWM, 0);
-}
-
-void rightTurn()
-{
-  analogWrite(moter_L_LPWM, 50);
-  analogWrite(moter_L_RPWM, 0);
-
-  analogWrite(moter_R_LPWM, 0);
-  analogWrite(moter_R_RPWM, 0);
-}
-
-void rightTurnBack()
-{
-  analogWrite(moter_L_LPWM, 0);
-  analogWrite(moter_L_RPWM, 0);
-
-  analogWrite(moter_R_LPWM, 0);
-  analogWrite(moter_R_RPWM, 50);
-}
-
-void sharpRightTurn(int speed=150)
-{
-  analogWrite(moter_L_LPWM, speed);
-  analogWrite(moter_L_RPWM, 0);
-
-  analogWrite(moter_R_LPWM, 0);
-  analogWrite(moter_R_RPWM, speed);
-}
-
-void leftTurn()
-{
-  analogWrite(moter_L_LPWM, 0);
-  analogWrite(moter_L_RPWM, 0);
-  analogWrite(moter_R_LPWM, rspeed);
-  analogWrite(moter_R_RPWM, 0);
-}
-
-void leftTurnBack()
-{
-  analogWrite(moter_L_LPWM, 0);
-  analogWrite(moter_L_RPWM, rspeed);
-  analogWrite(moter_R_LPWM, 0);
-  analogWrite(moter_R_RPWM, 0);
-}
-
-void sharpLeftTurn(int speed=150)
-{
-  analogWrite(moter_L_LPWM, 0);
-  analogWrite(moter_L_RPWM, speed);
-
-  analogWrite(moter_R_LPWM, speed);
-  analogWrite(moter_R_RPWM, 0);
-}
-
-void justLineFollowFront()
-{
-    int  leftmost = analogRead(array_FML);
-    int  left = analogRead(array_FL);
-    int  middle = analogRead(array_FC);
-    int  right = analogRead(array_FR);
-    int  rightmost = analogRead(array_FMR);
-
-  if(left >= threshold && middle <= threshold && right >=threshold)
-  {
-    bothForward(lspeed-20+5,rspeed-20);
-  }
-  else if(left <= threshold  && right >=threshold)
-  {
-    leftTurn();
-  }
-  else if(left >= threshold && right <=threshold)
-  {
-    rightTurn();
-  }
-   else if(leftmost <= threshold && rightmost >=threshold)
-  {
-    leftTurn();
-  }
-  else if(leftmost >= threshold && rightmost <=threshold)
-  {
-    rightTurn();
-  }
-  else{
-    bothForward(lspeed-15,rspeed);
-  }
-}
-
-void justLineFollowBack()
-{
-
-  int  leftmost = analogRead(array_BML);
-  int  left = analogRead(array_BL);
-  int  middle = analogRead(array_BC);
-  int  right = analogRead(array_BR);
-  int  rightmost = analogRead(array_BMR);
-
-  if(left >= threshold && middle <= threshold && right >=threshold)
-  {
-    bothBackward();
-  }
-  else if(left <= threshold  && right >=threshold)
-  {
-    rightTurnBack();
-  }
-
-  else if(leftmost <= threshold  && rightmost >=threshold)
-  {
-    rightTurnBack();
-  }
-  else if(left >= threshold && right <=threshold)
-  {
-    leftTurnBack();
-  }
-
-  else if(leftmost >= threshold && rightmost <=threshold)
-  {
-    leftTurnBack();
-  }
-  else{
-    bothBackward();
-  }
-}
-
-void LencodeFunc()
-{
-    leftEncoderTicks++;
-}
-
-void RencodeFunc()
-{
-    rightEncoderTicks++;
-}
-
-void rightEncoder(int value,int speed=150)
-{
-    leftEncoderTicks = 0;
-    rightEncoderTicks = 0;
-    while (rightEncoderTicks < value)
-    {
-        Serial.print(leftEncoderTicks);
-        Serial.print(" ");
-        sharpRightTurn(speed);
-    }
-    halt();
-}
-
-void leftEncoder(int value, int speed=150)
-{
-    leftEncoderTicks = 0;
-    rightEncoderTicks = 0;
-    while (rightEncoderTicks < value)
-    {
-        Serial.print(leftEncoderTicks);
-        Serial.print(" ");
-        sharpLeftTurn(speed);
- 
-    }
-    halt();
-}
-
-void forwardEncoder(int value)
-{
-    leftEncoderTicks = 0;
-    rightEncoderTicks = 0;
-    while (leftEncoderTicks < value)
-    {
-        Serial.print(leftEncoderTicks);
-        Serial.print(" ");
-        bothForward(35,40);
-    }
-    halt();
-}
-
-void lineFollowEncoderFront(int value)
-{
-    leftEncoderTicks = 0;
-    rightEncoderTicks = 0;
-    while (rightEncoderTicks < value)
-    {
-        Serial.print(rightEncoderTicks);
-        Serial.print(" ");
-        justLineFollowFront();
-    }
-    halt();
-}
-
-void lineFollowEncoderBack(int value)
-{
-    leftEncoderTicks = 0;
-    rightEncoderTicks = 0;
-    while (rightEncoderTicks < value)
-    {
-        Serial.print(rightEncoderTicks);
-        Serial.print(" ");
-        justLineFollowBack();
-    }
-    halt();
-}
-
-void backEncoder(int value)
-{
-    leftEncoderTicks = 0;
-    rightEncoderTicks = 0;
-    while (leftEncoderTicks < value)
-    {
-        Serial.print(leftEncoderTicks);
-        Serial.print(" ");
-        bothBackward();
-    }
-    halt();
-
-}
-
-void lineFollowFront(int &currentCounter, int targetCounter,int leftmost, int left,int  middle,int right,int rightmost,int lspeed,int rspeed)
-{
-  if(left >= threshold && middle <= threshold && right >=threshold)
-  {
-    bothForward(lspeed,rspeed);
-  }
-  else if(left <= threshold  && right >=threshold)
-  {
-    leftTurn();
-  }
-  else if(left >= threshold && right <=threshold)
-  {
-    rightTurn();
-  }
-   else if(leftmost <= threshold && rightmost >=threshold)
-  {
-    leftTurn();
-  }
-  else if(leftmost >= threshold && rightmost <=threshold)
-  {
-    rightTurn();
-  }
-  else if (leftmost < threshold  && rightmost < threshold)
-  {
-    currentCounter++;
-    if (currentCounter != targetCounter)
-    {
-      bothForward(lspeed,rspeed);
-      lineFollowEncoderFront(60);
-    }
-  }
-  else{
-    bothForward(lspeed,rspeed);
-  }
-}
-
-void lineFollowBack(int &currentCounter, int targetCounter, int leftmost, int left, int middle, int right, int rightmost)
-{
-  if(left >= threshold && middle <= threshold && right >=threshold)
-  {
-    bothBackward();
-  }
-  else if(left <= threshold  && right >=threshold)
-  {
-    rightTurnBack();
-  }
-  else if(left >= threshold && right <=threshold)
-  {
-    leftTurnBack();
-  }
-    else if(leftmost <= threshold  && rightmost >=threshold)
-  {
-    rightTurnBack();
-  }
-  else if(leftmost >= threshold && rightmost <=threshold)
-  {
-    leftTurnBack();
-  }
-  else if (leftmost < threshold &&  rightmost < threshold)
-  {
-    currentCounter++;
-    if (currentCounter != targetCounter)
-    {
-      bothBackward();
-      lineFollowEncoderBack(120);
-    }
-  }
-  else{
-    bothBackward();
-  }
-}
-
-void lineFollowUntil(int untilCount,bool frontArray=false,bool backArray=false,int lspeed=45,int rspeed=50)
-{
-  int counter = 0;
-
-  while (counter < untilCount)
-  {
-    int leftmost;
-    int left;
-    int middle;
-    int right;
-    int rightmost;
-
-    if(frontArray){
-      leftmost = analogRead(array_FML);
-      left = analogRead(array_FL);
-      middle = analogRead(array_FC);
-      right = analogRead(array_FR);
-      rightmost = analogRead(array_FMR);
-      lineFollowFront(
-        counter,
-        untilCount,
-        leftmost, left, middle, right, rightmost,lspeed,rspeed);
-    }
-    else if(backArray){
-      leftmost = analogRead(array_BML);
-      left = analogRead(array_BL);
-      middle = analogRead(array_BC);
-      right = analogRead(array_BR);
-      rightmost = analogRead(array_BMR);
-      lineFollowBack(
-        counter,
-        untilCount,
-        leftmost, left, middle, right, rightmost);
-    }
-
-    if (counter >= untilCount)
-    {
-      halt();
+void callGridFunctionBlue(int switchValue) {
+  switch (switchValue) {
+    case 1:
+      Serial.println("Grid 1 Blue");
+      grid1Blue();  // or grid1Red() as needed
+      delay(500000);
       break;
-    }
-  }
-}
-
-void checkPoint(){
-  while (true){
-    int right_ir = digitalRead(rightIR);
-    int left_ir = digitalRead(leftIR);
-
-    if(right_ir == 0 && left_ir == 0){
-      bothForward(45,50);
-    }
-    else{
-      halt();
-      delay(500);
+    case 2:
+      Serial.println("Grid 2 Blue");
+      grid2Blue();
+      delay(500000);
       break;
-     
-    }
-  }
-}
-
-void centered(){
-  while (true){
-    int right_ir = digitalRead(rightIR);
-    int left_ir = digitalRead(leftIR);
-
-    if(right_ir == 0 && left_ir == 0){
-      bothBackward();
-    }
-    else{
-      halt();
-      delay(500);
+    case 3:
+      Serial.println("Grid 3 Blue");
+      grid3Blue();
+      delay(500000);
       break;
-    }
+    case 4:
+      Serial.println("Grid 4 Blue");
+      grid4Blue();
+      delay(500000);
+      break;
+    case 5:
+      Serial.println("Grid 5 Blue");
+      grid5Blue();
+      delay(500000);
+      break;
+    case 6:
+      Serial.println("Grid 6 Blue");
+      grid6Blue();
+      delay(500000);
+      break;
+    case 7:
+      Serial.println("Grid 7 Blue");
+      grid7Blue();
+      delay(500000);
+      break;
+    case 8:
+      Serial.println("Grid 8 Blue");
+      grid8Blue();
+      delay(500000);
+      break;
+    case 9:
+      Serial.println("Grid 9 Blue");
+      grid9Blue();
+      delay(500000);
+      break;
+    case 10:
+      Serial.println("Grid 10 Blue");
+      grid10Blue();
+      delay(500000);
+      break;
+    default:
+      // Handle invalid switch values
+      break;
   }
 }
 
-void treePicInit(){
-
-    for (pos = 80; pos >= 12; pos -= 1) {
-      myservo.write(pos);          
-      delay(15);                      
+void callGridFunctionRed(int switchValue) {
+  switch (switchValue) {
+    case 1:
+      Serial.println("Grid 1 Red");
+      grid1Red();
+      delay(500000);
+      break;
+    case 2:
+      Serial.println("Grid 2 Red");
+      grid2Red();
+      delay(500000);
+      break;
+    case 3:
+      Serial.println("Grid 3 Red");
+      grid3Red();
+      delay(500000);
+      break;
+    case 4:
+      Serial.println("Grid 4 Red");
+      grid4Red();
+      delay(500000);
+      break;
+    case 5:
+      Serial.println("Grid 5 Red");
+      grid5Red();
+      delay(500000);
+      break;
+    case 6:
+      Serial.println("Grid 6 Red");
+      grid6Red();
+      delay(500000);
+      break;
+    case 7:
+      Serial.println("Grid 7 Red");
+      grid7Red();
+      delay(500000);
+      break;
+    case 8:
+      Serial.println("Grid 8 Red");
+      grid8Red();
+      delay(500000);
+      break;
+    case 9:
+      Serial.println("Grid 9 Red");
+      grid9Red();
+      delay(500000);
+      break;
+    case 10:
+      Serial.println("Grid 10 Red");
+      grid10Red();
+      break;
+    default:
+      // Handle invalid switch values
+      break;
   }
 }
 
-void treePic(){
-    for (pos = 12; pos <= 50; pos += 1) {
-      myservo.write(pos);          
-      delay(15);                      
-  }
-  
-}
 
-void treeDrop(){
-
-    for (pos = 50; pos >= 12; pos -= 1) {
-      myservo.write(pos);          
-      delay(15);                     
-  }
-
-  halt();
-
-}
-
-void grid2Blue(){
-  //#################################################
-  // blue
-  // 1,0,0
-  // 0,1,0
-  // 0,0,1
-
-  // tree pick 1 (3,3)
-  lineFollowUntil(4,true,false);
-  checkPoint();
-  leftEncoder(210);
-  halt();
-  delay(500);
-  lineFollowUntil(3,true,false);
-  checkPoint();
-  leftEncoder(220);
-  halt();
-  delay(500);
-  lineFollowEncoderFront(40);
-  halt();
-  delay(100);
-  lineFollowEncoderBack(100+100);
-  bothBackward();
-  delay(200);
-  halt();
-  treePicInit();
-  checkPoint();
-  lineFollowEncoderFront(160);
-  halt();
-  treePic();
-  centered();
-  rightEncoder(210);
-  halt();
-  delay(1000);
-  // drop tree (3,3)
-  lineFollowUntil(3,true,false);
-  checkPoint();
-  delay(1000);
-  lineFollowEncoderFront(145);
-  halt();
-  delay(500);
-  treeDrop();
-
-  // tree drop 1 (3,3)
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  leftEncoder(210);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  rightEncoder(210);
-  delay(1000);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  lineFollowEncoderFront(140);
-  treePic();
-  delay(500);
-  lineFollowUntil(4,false,true);
-  centered();
-  delay(500);
-  lineFollowEncoderBack(200-50);
-  delay(500);
-  treeDrop();
-  delay(500);
-// rock drop 2 (2,2)
-  centered();
-  leftEncoder(210);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  rightEncoder(210);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  lineFollowEncoderFront(145);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  rightEncoder(210);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  leftEncoder(210);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  delay(500);
-  treeDrop();
-  delay(500);
-
-// tree drop 2 (2,2)
-  lineFollowUntil(2,false,true);
-  centered();
-  rightEncoder(210);
-  lineFollowUntil(1,false,true);
-  centered();
-  leftEncoder(210);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  treePic();
-  delay(500);
-  lineFollowUntil(3,false,true);
-  centered();
-  delay(500);
-  lineFollowEncoderBack(200-50);
-  delay(500);
-  treeDrop();
-  delay(500);
-
-// rock drop 3 (1,1)
-  centered();
-  delay(500);
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  delay(500);
-  treeDrop();
-  delay(500);
-
-// tree drop 3 (1,1)
-  lineFollowUntil(2,false,true);
-  centered();
-  delay(500);
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(150);
-  delay(500);
-  treePic();
-  delay(500);
-  centered();
-  delay(500);
-  leftEncoder(470,100);
-  delay(500);
-  lineFollowUntil(1,false,true);
-  centered();
-  lineFollowUntil(1,true,false);
-  // lineFollowEncoderBack(100);
-  delay(500);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(110+40);
-  delay(500);
-  treeDrop();
-  delay(500);
-  centered();
-  // parking
-  delay(500);
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(5,true,false,60,65);
-  // checkPoint();
-  // lineFollowEncoderFront(300);
-}
-
-
-void grid1Blue(){
-  //#################################################
-  // blue
-  // 0,0,1
-  // 0,1,0
-  // 1,0,0
-
-  // rock drop 1 (1,3)
-  lineFollowUntil(4,true,false);
-  checkPoint();
-  leftEncoder(210);
-  halt();
-  delay(500);
-  lineFollowUntil(5,true,false);
-  checkPoint();
-  leftEncoder(220);
-  halt();
-  delay(500);
-  lineFollowEncoderFront(40);
-  halt();
-  lineFollowEncoderBack(100+100);
-  treePicInit();
-  checkPoint();
-  lineFollowEncoderFront(160);
-  halt();
-  treePic();
-  centered();
-  rightEncoder(210);
-  halt();
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  halt();
-  delay(500);
-  treeDrop();
-
-  // tree drop 1 (1,3)
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(1,false,true);
-  delay(500);
-  centered();
-  leftEncoder(230);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  lineFollowEncoderFront(135);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  delay(500);
-  lineFollowEncoderBack(160);
-  delay(500);
-  treeDrop();
-  delay(500);
-  // rock drop 2 (2,2)
-  centered();
-  leftEncoder(240);
-  delay(500);
-  lineFollowEncoderBack(200);
-  delay(500);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(135);
-  delay(500);
-  treePic();
-  checkPoint();
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  delay(500);
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  leftEncoder(245);
-  delay(500);
-  lineFollowEncoderBack(30);
-  delay(500);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(135);
-  delay(500);
-  treeDrop();
-  delay(500);
-
-  //////// tree drop 2
-  centered();
-  leftEncoder(235);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(1,false,true);
-  delay(500);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(135);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(3,false,true);
-  centered();
-  lineFollowEncoderBack(160);
-  delay(500);
-  treeDrop();
-  ///////////// rock drop 3 
-  delay(500);
-  centered();
-  leftEncoder(235);
-  delay(500);
-  lineFollowEncoderBack(200);
-  delay(500);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(135);
-  delay(500);
-  treePic();
-  delay(500);
-  checkPoint();
-  delay(500);
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  delay(500);
-  leftEncoder(235);
-  delay(500);
-
-
-  lineFollowUntil(1,false,true);
-  centered();
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(135);
-  delay(500);
-  treeDrop();
-  delay(500);
-
-  ////tree 3
-  lineFollowUntil(2,false,true);
-  centered();
-  delay(500);
-  leftEncoder(235);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(135);
-  delay(500);
-  treePic();
-  delay(500);
-  centered();
-  leftEncoder(470);
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  lineFollowEncoderFront(135);
-  delay(500);
-  treeDrop();
-  delay(500);
-  lineFollowUntil(3,false,true);
-  centered();
-  delay(500);
-  leftEncoder(235);
-  delay(500);
-  myservo.write(80);
-  lineFollowUntil(4,true,false);
-  checkPoint();
-  lineFollowEncoderFront(250);
-  
-}
-
-
-void grid9Blue(){
-  // blue
-  // 0,1,0
-  // 0,0,0
-  // 1,0,1
-  
-
-
-  // rock drop 2 (3,1)
-  lineFollowUntil(4,true,false);
-  checkPoint();
-  leftEncoder(210);
-  halt();
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  leftEncoder(220);
-  halt();
-  delay(500);
-  lineFollowUntil(3,true,false);
-  checkPoint();
-  lineFollowEncoderFront(60);
-  delay(500);
-  rightEncoder(225);
-  delay(500);
-  lineFollowEncoderBack(200);
-  delay(500);
-  treePicInit();
-  delay(500);
-  checkPoint();
-  lineFollowEncoderFront(145);
-  delay(500);
-  treePic();
-  delay(500);
-
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  rightEncoder(215);
-  delay(500);
-  lineFollowUntil(3,true,false);
-  checkPoint();
-  leftEncoder(215);
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  delay(500);
-  treeDrop();
-  delay(500);
-
-  // tree drop 2 (3,1)
-  lineFollowUntil(2,false,true);
-  centered();
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(1,false,true);
-  centered();
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  delay(500);
-  treePic();
-  delay(500);
-  centered();
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  rightEncoder(210);
-
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  delay(500);
-  treeDrop();
-  delay(500);
-  centered();
-  leftEncoder(210);
-  // myservo.write(12);
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  lineFollowEncoderFront(30);
-  delay(500);
-  rightEncoder(235);
-  delay(500);
-  centered();
-  lineFollowEncoderFront(140);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(4,false,true);
-  centered();
-  delay(500);
-  lineFollowEncoderBack(160);
-  delay(500);
-  treeDrop();
-  delay(500);
-
-
-  // tree drop (3,3)
-  centered();
-  rightEncoder(220);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  lineFollowEncoderFront(30);
-  delay(500);
-  leftEncoder(235);
-  delay(500);
-  centered();
-  lineFollowEncoderFront(140);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  leftEncoder(235);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  lineFollowEncoderFront(140);
-  delay(500);
-  treeDrop();
-  delay(500);
-
-  // rock drop 3 (1,2)
-  
-  lineFollowUntil(2,false,true);
-  centered();
-  // myservo.write(50);
-  // delay(200);
-  rightEncoder(235);
-  delay(500);
-  // treePicInit();
-  delay(500);
-  centered();
-  lineFollowEncoderFront(140);
-  delay(500);
-  treePic();
-  delay(500);
-  checkPoint();
-  leftEncoder(235);
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  lineFollowEncoderBack(160);
-  delay(500);
-  treeDrop();
-  delay(500);
-  centered();
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-
-  leftEncoder(235);
-  delay(500);
-  centered();
-  lineFollowEncoderFront(145);
-  delay(500);
-
-  treePic();
-  delay(500);
-  lineFollowUntil(3,true,false);
-  checkPoint();
-  rightEncoder(235);
-  delay(500);
-
-  lineFollowUntil(1,false,true);
-  centered();
-  lineFollowEncoderBack(160);
-  delay(500);
-  treeDrop();
-  delay(500);
-  centered();
-  lineFollowUntil(1,false,true);
-  rightEncoder(235);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  rightEncoder(235);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  lineFollowEncoderFront(300);
-
-}
-
-void grid3blue()
-{
-  //#################################################
-  // blue
-  // 1,1,1
-  // 0,0,0
-  // 0,0,0
-
-  // Step 1: Drop rock (1,1)
-  lineFollowUntil(4,true,false);
-  checkPoint();
-  leftEncoder(210);
-  halt();
-  delay(500);
-  lineFollowUntil(5,true,false);
-  checkPoint();
-  leftEncoder(220);
-  halt();
-  delay(500);
-  lineFollowEncoderFront(40);
-  halt();
-  lineFollowEncoderBack(100+100);
-  treePicInit();
-  checkPoint();
-  lineFollowEncoderFront(160);
-  halt();
-  treePic();
-  centered();
-  rightEncoder(210);
-  halt();
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  halt();
-  delay(500);
-  treeDrop();
-
-  // step 5: tree drop (1,3)
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  rightEncoder(235);
-  delay(500);
-  lineFollowUntil(1,false,true);
-  delay(500);
-  centered();
-  leftEncoder(230);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  lineFollowEncoderFront(145);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  delay(500);
-  lineFollowEncoderBack(160);
-  delay(500);
-  treeDrop();
-  delay(500);
-
-  //
-  lineFollowUntil(2,false,true);
-  centered();
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  delay(500);
-  lineFollowUntil(1,false,true);
-  centered();
-  lineFollowEncoderFront(145);
-
-  delay(500);
-  treeDrop();
-  delay(500);
-  centered();
-
-  //
-  rightEncoder(235);
-  centered();
-  lineFollowUntil(1,false,true);
-  centered();
-  leftEncoder(235);
-  delay(500);
-  centered();
-  lineFollowUntil(1,false,true);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-
-  lineFollowEncoderFront(145);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  lineFollowEncoderBack(160);
-  delay(500);
-  treeDrop();
-  delay(500);
-//
-  lineFollowUntil(2,false,true);
-  centered();
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowEncoderFront(145);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(2,true,false);
-  checkPoint();
-
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  delay(500);
-  lineFollowUntil(1,false,true);
-  centered();
-  lineFollowEncoderFront(145);
-  delay(500);
-  treeDrop();
-  delay(500);
-  centered();
-
-  //
-  rightEncoder(235);
-  centered();
-  lineFollowUntil(1,false,true);
-  centered();
-  leftEncoder(235);
-  delay(500);
-  centered();
-  lineFollowUntil(1,false,true);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-
-  lineFollowEncoderFront(145);
-  delay(500);
-  treePic();
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  lineFollowEncoderBack(160);
-  delay(500);
-  treeDrop();
-  delay(500);
-  lineFollowUntil(2,false,true);
-  centered();
-  leftEncoder(210);
-  delay(500);
-  lineFollowUntil(1,true,false);
-  checkPoint();
-  rightEncoder(210);
-  delay(500);
-  lineFollowUntil(3,true,false);
-  checkPoint();
-  rightEncoder(210);
-  delay(500);
-  checkPoint();
-
-  lineFollowUntil(5,true,false,100,105);
-  checkPoint();
-  lineFollowEncoderFront(300);
-
-}
+// ############################################################ red ###############################################
 
 void setup() {
   Serial.begin(9600);
@@ -1385,43 +374,78 @@ void setup() {
   pinMode(map_reader_2_2, INPUT);
   pinMode(map_reader_3_1, INPUT);
 
+  pinMode(Button1, INPUT_PULLUP);
+  pinMode(Button2, INPUT_PULLUP);
+  pinMode(Button3, INPUT_PULLUP);
+  pinMode(Button4, INPUT_PULLUP);
+
+  pinMode(arena_selection_pin, INPUT_PULLUP);
+
   myservo.attach(servo_pin);
   myservo.write(90);
 
- 
+  delay(10);
+  int sel = digitalRead(arena_selection_pin);
+  if (sel == 1){
+    Serial.println("Red Arena");
+    int switchValue = getSwitchValue();
+    callGridFunctionRed(switchValue);
+  } 
+  else 
+  {
+    Serial.println("Blue Arena");
+    int switchValue = getSwitchValue();
+    callGridFunctionBlue(switchValue);
+  }
+  delay(100);
 
-// ###############################################
-// map reading
+  // grid1Blue();
+  // grid1Red();
 
-  // // map reading array
-  // lineFollowUntil(2,true,false);
-  // checkPoint();
-  // leftEncoder(250);
-  // delay(100);
-  // bothBackward();
-  // delay(100);
-  // halt();
+  // grid2Blue();
+  // grid2Red();
+
+  // grid3Blue();
+  // grid3Red();
+
+  // grid4Blue();
+  // grid4Red();
+
+  // grid5Blue();
+  // grid5Red();
+
+  // grid6Blue();
+  // grid6Red();
+
+  // grid7Blue();
+  // grid7Red();
+
+  // grid8Blue();
+  // grid8Red();
 
 
-  grid2Blue();
-  // delay(1000);
-  // leftEncoder(490,70);
-  // myservo.write(12);
+  // grid9Blue();
+  // grid9Red();
 
+  
 
 }
 
-
-void loop(){
-
-  // bothForward();
-  // bothBackward();
-  // treePic();
-  // arraysValues();
-  // ticksValues();
-  // middleIR();
-  // justLineFollowBack();
-
+void loop(){ 
+ 
+  int sel = digitalRead(arena_selection_pin);
+  if (sel == 1){
+    Serial.println("Red Arena");
+    int switchValue = getSwitchValue();
+    callGridFunctionRed(switchValue);
+  } 
+  else 
+  {
+    Serial.println("Blue Arena");
+    int switchValue = getSwitchValue();
+    callGridFunctionBlue(switchValue);
+  }
+  delay(3000);
 }
 
 
