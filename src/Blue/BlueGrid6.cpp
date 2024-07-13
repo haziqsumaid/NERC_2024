@@ -4,6 +4,7 @@
 #include "LineFollow.h"
 #include "ServoControl.h"
 #include "Blue/BlueGrid6.h"
+#include "DelayControl.h"
 
 void grid6Blue(){
   //#################################################
@@ -17,12 +18,12 @@ void grid6Blue(){
   checkPoint();
   leftEncoder(210);
   halt();
-  delay(500);
+  myDelay(250);
   lineFollowUntil(4,true,false);
   checkPoint();
   leftEncoder(220);
   halt();
-  delay(500);
+  myDelay(250);
   lineFollowEncoderFront(40);
   halt();
   lineFollowEncoderBack(100+100);
@@ -32,172 +33,172 @@ void grid6Blue(){
   halt();
   treePic();
   centered();
-  rightEncoder(210);
+  rightEncoder(210,100);
   halt();
-  delay(500);
+  myDelay(250);
   lineFollowUntil(2,true,false);
   checkPoint();
-  delay(500);
+  myDelay(250);
   lineFollowEncoderFront(145);
   halt();
-  delay(500);
+  myDelay(250);
   treeDrop();
 
     // step 5: tree drop (1,3)
-  delay(500);
+  myDelay(250);
   lineFollowUntil(2,false,true);
   centered();
   rightEncoder(235);
-  delay(500);
+  myDelay(250);
   lineFollowUntil(1,false,true);
-  delay(500);
+  myDelay(250);
   centered();
   leftEncoder(230);
-  delay(500);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
   lineFollowEncoderFront(145);
-  delay(500);
+  myDelay(250);
   treePic();
-  delay(500);
+  myDelay(250);
   lineFollowUntil(3,false,true);
   centered();
-  delay(500);
+  myDelay(250);
   lineFollowEncoderBack(160);
-  delay(500);
+  myDelay(250);
   treeDrop();
-  delay(500);
+  myDelay(250);
 
   //
   lineFollowUntil(2,false,true);
   centered();
   leftEncoder(210);
-  delay(500);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
   rightEncoder(210);
-  delay(500);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  delay(500);
+  myDelay(250);
   lineFollowEncoderFront(145);
-  delay(500);
+  myDelay(250);
   treePic();
 
-  delay(500);
+  myDelay(250);
   lineFollowUntil(2,true,false);
   checkPoint();
-  rightEncoder(210);
-  delay(500);
+  rightEncoder(210,100);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  leftEncoder(210);
-  delay(500);
+  leftEncoder(210,100);
+  myDelay(250);
   lineFollowUntil(1,true,false);
-  delay(500);
+  myDelay(250);
   checkPoint();
   lineFollowEncoderFront(145);
-  delay(500);
+  myDelay(250);
   treeDrop();
-  delay(500);
+  myDelay(250);
   
   lineFollowUntil(2,false,true);
   centered();
-  delay(500);
+  myDelay(250);
 
   leftEncoder(235);
-  delay(500);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  delay(500);
+  myDelay(250);
   rightEncoder(210);
-  delay(500);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  delay(500);
+  myDelay(250);
   lineFollowEncoderFront(145);
-  delay(500);
+  myDelay(250);
   treePic();
-  delay(500);
+  myDelay(250);
   lineFollowUntil(3,false,true);
   centered();
-  delay(500);
+  myDelay(250);
   lineFollowEncoderBack(160);
-  delay(500);
+  myDelay(250);
   treeDrop();
-  delay(500);
+  myDelay(250);
 
   //
   lineFollowUntil(2,false,true);
   centered();
   leftEncoder(210);
-  delay(500);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
   rightEncoder(210);
-  delay(500);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  delay(500);
+  myDelay(250);
   lineFollowEncoderFront(145);
-  delay(500);
+  myDelay(250);
   treePic();
-  delay(500);
+  myDelay(250);
 
   lineFollowUntil(2,true,false);
   checkPoint();
-  rightEncoder(210);
-  delay(500);
+  rightEncoder(210,100);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  leftEncoder(210);
-  delay(500);
+  leftEncoder(210,100);
+  myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  delay(500);
+  myDelay(250);
   lineFollowEncoderFront(145);
-  delay(500);
+  myDelay(250);
   treeDrop();
-  delay(500);
+  myDelay(250);
   lineFollowUntil(2,false,true);
   centered();
-    delay(500);
+    myDelay(250);
 
   leftEncoder(230);
-    delay(500);
+    myDelay(250);
 
   lineFollowUntil(1,true,false);
   checkPoint();
-    delay(500);
+    myDelay(250);
 
   rightEncoder(235);
-    delay(500);
+    myDelay(250);
 
   lineFollowUntil(1,true,false);
   checkPoint();
-  delay(500);
+  myDelay(250);
 
   lineFollowEncoderFront(145);
-  delay(500);
+  myDelay(250);
   treePic();
-  delay(500);
+  myDelay(250);
   centered();
   leftEncoder(470,100);
   lineFollowUntil(1,true,false);
   checkPoint();
   lineFollowEncoderFront(145);
-  delay(500);
+  myDelay(250);
   treeDrop();
-  delay(500);
+  myDelay(250);
   lineFollowUntil(2,false,true);
   myservo.write(80);
   centered();
-  delay(500);
+  myDelay(250);
   leftEncoder(235);
-  delay(500);
-  lineFollowUntil(4,true,false);
-  checkPoint();
-  lineFollowEncoderFront(300);
-  halt();
+  myDelay(250);
+  lineFollowUntil(5,true,false);
+  // checkPoint();
+  // lineFollowEncoderFront(300);
+  // halt();
 
 }

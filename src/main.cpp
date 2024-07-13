@@ -399,7 +399,7 @@ void setup() {
   }
   delay(100);
 
-  // grid1Blue();
+  // grid1Blue(); //(done) (1:25)
   // grid1Red();
 
   // grid2Blue();
@@ -420,7 +420,7 @@ void setup() {
   // grid7Blue();
   // grid7Red();
 
-  // grid8Blue();
+  // grid8Blue();   //done   (1:30)
   // grid8Red();
 
 
