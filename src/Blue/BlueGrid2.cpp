@@ -43,7 +43,7 @@ void grid2Blue(){
   // drop tree (3,3)
   lineFollowUntil(3,true,false);
   checkPoint();
-  delay(1000);
+  // delay(1000);
   lineFollowEncoderFront(145);
   halt();
   myDelay(250);
@@ -65,7 +65,7 @@ void grid2Blue(){
   myDelay(250);
   lineFollowUntil(4,false,true);
   centered();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderBack(200-50);
   myDelay(250);
   treeDrop();
@@ -90,7 +90,7 @@ void grid2Blue(){
   leftEncoder(210,100);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(145);
   myDelay(250);
   treeDrop();
@@ -105,13 +105,13 @@ void grid2Blue(){
   leftEncoder(210);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(145);
   treePic();
   myDelay(250);
   lineFollowUntil(3,false,true);
   centered();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderBack(200-50);
   myDelay(250);
   treeDrop();
@@ -119,34 +119,34 @@ void grid2Blue(){
 
 // rock drop 3 (1,1)
   centered();
-  myDelay(250);
+  // myDelay(250);
   leftEncoder(210);
   myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   rightEncoder(210);
   myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(145);
   myDelay(250);
   treePic();
   myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   rightEncoder(210,100);
   myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   leftEncoder(210,100);
   myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(145);
   myDelay(250);
   treeDrop();
@@ -155,23 +155,23 @@ void grid2Blue(){
 // tree drop 3 (1,1)
   lineFollowUntil(2,false,true);
   centered();
-  myDelay(250);
+  // myDelay(250);
   leftEncoder(210);
   myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   rightEncoder(210);
   myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(150);
   myDelay(250);
   treePic();
   myDelay(250);
   centered();
-  myDelay(250);
+  // myDelay(250);
   leftEncoder(470,100);
   myDelay(250);
   lineFollowUntil(1,false,true);
@@ -180,7 +180,7 @@ void grid2Blue(){
   // lineFollowEncoderBack(100);
   myDelay(250);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(110+40);
   myDelay(250);
   treeDrop();
@@ -192,6 +192,4 @@ void grid2Blue(){
   myDelay(250);
   myservo.write(80);
   lineFollowUntil(5,true,false);
-  // checkPoint();
-  // lineFollowEncoderFront(300);
 }

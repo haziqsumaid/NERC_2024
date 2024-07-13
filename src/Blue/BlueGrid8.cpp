@@ -39,7 +39,7 @@ void grid8Blue(){
   myDelay(250);
   lineFollowUntil(5,false,true);
   centered();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(145);
   halt();
   myDelay(250);
@@ -122,7 +122,7 @@ void grid8Blue(){
   lineFollowUntil(1,true,false);
   lineFollowUntil(1,false,true);
   centered();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(145);
   myDelay(250);
   treeDrop();
@@ -188,8 +188,5 @@ void grid8Blue(){
   myservo.write(80);
   myDelay(250);
   lineFollowUntil(5, true, false);
-//   myDelay(250);
-//   checkPoint();
-//   lineFollowEncoderFront(300);
 
 }

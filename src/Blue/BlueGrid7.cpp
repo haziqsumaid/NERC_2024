@@ -39,7 +39,7 @@ void grid7Blue(){
   myDelay(250);
   lineFollowUntil(2,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(145);
   halt();
   myDelay(250);
@@ -59,7 +59,7 @@ void grid7Blue(){
   myDelay(250);
   lineFollowUntil(1,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(145);
   myDelay(250);
   treePic();
@@ -83,7 +83,7 @@ void grid7Blue(){
   myDelay(250);
   lineFollowUntil(2,true,false);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   leftEncoder(235);
   myDelay(250);
   lineFollowUntil(1,true,false);
@@ -179,7 +179,7 @@ void grid7Blue(){
   lineFollowUntil(1,false,true);
   myDelay(250);
   checkPoint();
-  myDelay(250);
+  // myDelay(250);
   lineFollowEncoderFront(145);
   myDelay(250);
   treePic();
@@ -206,8 +206,5 @@ void grid7Blue(){
   rightEncoder(235);
   myDelay(250);
   lineFollowUntil(5,true,false);
-//   myDelay(250);
-//   checkPoint();
-//   lineFollowEncoderFront(300);
 
 }
